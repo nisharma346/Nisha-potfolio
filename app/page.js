@@ -1,69 +1,236 @@
-import Image from "next/image";
+
+const skills = [
+  "Python",
+  "Django",
+  "JavaScript",
+  "Node.js",
+  "Next.js",
+  "MongoDB",
+  "HTML & CSS",
+  "Tailwind CSS",
+];
+
+const projects = [
+  {
+    number: "01",
+    name: "MediNest",
+    category: "Healthcare Platform",
+    description:
+      "A healthcare platform designed to connect patients with healthcare services through a modern digital experience.",
+    stack: "Python · Django · SQLite",
+  },
+  {
+    number: "02",
+    name: "Todo Application",
+    category: "Web Application",
+    description:
+      "A simple and functional task management application built to organize everyday activities.",
+    stack: "Next.js · MongoDB · Node.js",
+  },
+  {
+    number: "03",
+    name: "Personal Portfolio",
+    category: "Personal Project",
+    description:
+      "A personal space to showcase my journey, technical skills and selected development projects.",
+    stack: "Next.js · MongoDB · Tailwind CSS",
+  },
+];
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.js
-            </code>{" "}
-            file.
+    <main>
+      {/* Navigation */}
+      <nav className="navbar">
+        <a href="#home" className="logo">
+          N<span>.</span>
+        </a>
+
+        <div className="nav-links">
+          <a href="#about">About</a>
+          <a href="#skills">Skills</a>
+          <a href="#projects">Projects</a>
+          <a href="#contact">Contact</a>
+        </div>
+
+        <a href="#contact" className="nav-button">
+          Let's Talk <span>↗</span>
+        </a>
+      </nav>
+
+      {/* Hero Section */}
+      <section className="hero section-container" id="home">
+        <div className="hero-content">
+          <div className="availability">
+            <span className="status-dot"></span>
+            Aspiring Full-Stack Developer
+          </div>
+
+          <p className="eyebrow">HELLO, I'M NISHA</p>
+
+          <h1>
+            Creating digital
+            <br />
+            experiences with
+            <br />
+            <span>purpose & passion.</span>
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+
+          <p className="hero-description">
+            I enjoy building modern websites and exploring technologies
+            that turn creative ideas into meaningful digital experiences.
+          </p>
+
+          <div className="hero-buttons">
+            <a href="#projects" className="primary-button">
+              Explore My Work <span>↗</span>
+            </a>
+
+            <a href="#about" className="text-button">
+              More About Me <span>↓</span>
+            </a>
+          </div>
+        </div>
+
+        <div className="hero-side">
+          <div className="hero-monogram">N.</div>
+          <p>DESIGNING · DEVELOPING · LEARNING</p>
+          <span>BASED IN INDIA</span>
+        </div>
+
+        <div className="hero-bottom">
+          <span>SCROLL TO EXPLORE</span>
+          <span>01 / 04</span>
+        </div>
+      </section>
+
+      {/* About Section */}
+      <section className="about section-container" id="about">
+        <div className="section-heading">
+          <span className="section-label">01 — ABOUT ME</span>
+          <h2>
+            A little about
+            <br />
+            <span>who I am.</span>
+          </h2>
+        </div>
+
+        <div className="about-content">
+          <p className="about-intro">
+            I'm Nisha, an aspiring developer passionate about technology,
+            creativity and building useful web experiences.
+          </p>
+
+          <p className="about-description">
+            My journey started with learning programming and gradually
+            exploring web development. I enjoy understanding how things
+            work behind the scenes, solving problems and continuously
+            improving my skills through practical projects.
+          </p>
+
+          <a href="#contact" className="underlined-link">
+            Let's connect <span>↗</span>
+          </a>
+        </div>
+      </section>
+
+      {/* Skills Section */}
+      <section className="skills section-container" id="skills">
+        <div className="section-heading">
+          <span className="section-label">02 — MY TOOLKIT</span>
+          <h2>
+            Technologies I
+            <br />
+            <span>work with.</span>
+          </h2>
+        </div>
+
+        <div className="skills-content">
+          <p>
+            Tools and technologies I have been learning and using
+            to build web applications.
+          </p>
+
+          <div className="skill-list">
+            {skills.map((skill, index) => (
+              <div className="skill-item" key={skill}>
+                <span className="skill-number">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+                <span>{skill}</span>
+                <span className="skill-arrow">↗</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Projects Section */}
+      <section className="projects section-container" id="projects">
+        <div className="projects-heading">
+          <div className="section-heading">
+            <span className="section-label">03 — SELECTED WORK</span>
+            <h2>
+              Things I've
+              <br />
+              <span>been building.</span>
+            </h2>
+          </div>
+
+          <p>
+            A selection of projects that reflect my learning,
+            creativity and development journey.
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        <div className="project-list">
+          {projects.map((project) => (
+            <article className="project-card" key={project.number}>
+              <span className="project-number">{project.number}</span>
+
+              <div className="project-info">
+                <span className="project-category">{project.category}</span>
+                <h3>{project.name}</h3>
+                <p>{project.description}</p>
+                <span className="project-stack">{project.stack}</span>
+              </div>
+
+              <span className="project-arrow">↗</span>
+            </article>
+          ))}
         </div>
-      </main>
-    </div>
+      </section>
+
+      {/* Contact Section */}
+      <section className="contact section-container" id="contact">
+        <span className="section-label">04 — GET IN TOUCH</span>
+
+        <h2>
+          Have an idea?
+          <br />
+          <span>Let's build it.</span>
+        </h2>
+
+        <p>
+          I'm always interested in learning, collaborating and
+          connecting with people who love building meaningful things.
+        </p>
+
+        <a href="mailto:your-email@example.com" className="primary-button">
+          Say Hello <span>↗</span>
+        </a>
+      </section>
+
+      {/* Footer */}
+      <footer className="footer">
+        <a href="#home" className="logo">
+          N<span>.</span>
+        </a>
+
+        <p>Designed & built with care by Nisha.</p>
+
+        <a href="#home">Back to top ↑</a>
+      </footer>
+    </main>
   );
 }
