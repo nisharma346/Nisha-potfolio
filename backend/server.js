@@ -4,6 +4,7 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 const projectRoutes = require("./routes/projectRoutes");
 const skillRoutes = require("./routes/skillRoutes");
+const aboutRoutes = require("./routes/AboutRoutes");
 require("dotenv").config();
 
 const app = express();
@@ -17,6 +18,8 @@ app.use("/api/projects", projectRoutes);
 
 // Skill Routes
 app.use("/api/skills", skillRoutes);
+// About Routes
+app.use("/api/about", aboutRoutes);
 
 // Home API
 app.get("/", (req, res) => {
