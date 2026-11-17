@@ -5,6 +5,10 @@ const mongoose = require("mongoose");
 const projectRoutes = require("./routes/projectRoutes");
 const skillRoutes = require("./routes/skillRoutes");
 const aboutRoutes = require("./routes/AboutRoutes");
+const experienceRoutes = require("./routes/experienceRoutes");
+const educationRoutes = require("./routes/educationRoutes");
+const contactRoutes = require("./routes/contactRoutes");
+const testimonialRoutes = require("./routes/testimonialRoutes");
 require("dotenv").config();
 
 const app = express();
@@ -20,6 +24,14 @@ app.use("/api/projects", projectRoutes);
 app.use("/api/skills", skillRoutes);
 // About Routes
 app.use("/api/about", aboutRoutes);
+// Experience Routes
+app.use("/api/experiences", experienceRoutes);
+// Education Routes
+app.use("/api/education", educationRoutes);
+
+app.use("/api/contact", contactRoutes);
+
+app.use("/api/testimonials", testimonialRoutes);
 
 // Home API
 app.get("/", (req, res) => {
