@@ -9,6 +9,7 @@ const experienceRoutes = require("./routes/experienceRoutes");
 const educationRoutes = require("./routes/educationRoutes");
 const contactRoutes = require("./routes/contactRoutes");
 const testimonialRoutes = require("./routes/testimonialRoutes");
+const certificationRoutes = require("./routes/certificationRoutes");
 require("dotenv").config();
 
 const app = express();
@@ -32,6 +33,8 @@ app.use("/api/education", educationRoutes);
 app.use("/api/contact", contactRoutes);
 
 app.use("/api/testimonials", testimonialRoutes);
+
+app.use("/api/certifications", certificationRoutes);
 
 // Home API
 app.get("/", (req, res) => {
