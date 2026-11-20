@@ -1,7 +1,8 @@
 
 const express = require("express");
 const mongoose = require("mongoose");
-const Skill = require("../models/Skill");
+const Skill = require("../models/skill");
+const authMiddleware = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
@@ -56,7 +57,7 @@ router.get("/:id", async (req, res) => {
 });
 
 // POST: Add skill
-router.post("/", async (req, res) => {
+router.post("/", authMiddleware, async (req, res) => {
     try {
         const skill = await Skill.create(req.body);
 
@@ -74,7 +75,7 @@ router.post("/", async (req, res) => {
 });
 
 // PUT: Update skill
-router.put("/:id", async (req, res) => {
+router.put("/:id", authMiddleware, async (req, res) => {
     try {
         if (!mongoose.isValidObjectId(req.params.id)) {
             return res.status(400).json({
@@ -113,7 +114,7 @@ router.put("/:id", async (req, res) => {
 });
 
 // DELETE: Remove skill
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", authMiddleware, async (req, res) => {
     try {
         if (!mongoose.isValidObjectId(req.params.id)) {
             return res.status(400).json({

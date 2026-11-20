@@ -2,6 +2,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const Testimonial = require("../models/Testimonial");
+const authMiddleware = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
@@ -26,7 +27,7 @@ router.get("/", async (req, res) => {
 });
 
 // POST: Add testimonial
-router.post("/", async (req, res) => {
+router.post("/", authMiddleware, async (req, res) => {
     try {
         const testimonial = await Testimonial.create(req.body);
 
@@ -44,7 +45,7 @@ router.post("/", async (req, res) => {
 });
 
 // PUT: Update testimonial
-router.put("/:id", async (req, res) => {
+router.put("/:id", authMiddleware, async (req, res) => {
     try {
         if (!mongoose.isValidObjectId(req.params.id)) {
             return res.status(400).json({
@@ -83,7 +84,7 @@ router.put("/:id", async (req, res) => {
 });
 
 // DELETE: Remove testimonial
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", authMiddleware, async (req, res) => {
     try {
         if (!mongoose.isValidObjectId(req.params.id)) {
             return res.status(400).json({

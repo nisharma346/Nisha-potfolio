@@ -2,6 +2,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const Education = require("../models/Education");
+const authMiddleware = require("../middleware/authMiddleware");
 
 const router = express.Router();
 

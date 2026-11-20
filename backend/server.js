@@ -10,6 +10,7 @@ const educationRoutes = require("./routes/educationRoutes");
 const contactRoutes = require("./routes/contactRoutes");
 const testimonialRoutes = require("./routes/testimonialRoutes");
 const certificationRoutes = require("./routes/certificationRoutes");
+const adminRoutes = require("./routes/adminRoutes");
 require("dotenv").config();
 
 const app = express();
@@ -35,7 +36,7 @@ app.use("/api/contact", contactRoutes);
 app.use("/api/testimonials", testimonialRoutes);
 
 app.use("/api/certifications", certificationRoutes);
-
+app.use("/api/admin", adminRoutes);
 // Home API
 app.get("/", (req, res) => {
     res.send("Nisha Portfolio Backend is Running!");

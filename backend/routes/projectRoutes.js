@@ -1,7 +1,7 @@
-
+const authMiddleware = require("../middleware/authMiddleware");
 const express = require("express");
 const mongoose = require("mongoose");
-const Project = require("../models/Project");
+const Project = require("../models/project");
 
 const router = express.Router();
 
@@ -55,7 +55,7 @@ router.get("/:id", async (req, res) => {
 });
 
 // 3. POST: Add New Project
-router.post("/", async (req, res) => {
+router.post("/", authMiddleware, async (req, res) => {
     try {
         const project = await Project.create(req.body);
 
@@ -72,8 +72,9 @@ router.post("/", async (req, res) => {
     }
 });
 
+
 // 4. PUT: Update Project
-router.put("/:id", async (req, res) => {
+router.put("/:id", authMiddleware, async (req, res) => {
     try {
         if (!mongoose.isValidObjectId(req.params.id)) {
             return res.status(400).json({
@@ -112,7 +113,7 @@ router.put("/:id", async (req, res) => {
 });
 
 // 5. DELETE: Remove Project
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", authMiddleware, async (req, res) => {
     try {
         if (!mongoose.isValidObjectId(req.params.id)) {
             return res.status(400).json({

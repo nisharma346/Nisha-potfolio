@@ -1,4 +1,4 @@
-
+import { getData } from "../lib/api";
 const skills = [
   "Python",
   "Django",
@@ -10,34 +10,18 @@ const skills = [
   "Tailwind CSS",
 ];
 
-const projects = [
-  {
-    number: "01",
-    name: "MediNest",
-    category: "Healthcare Platform",
-    description:
-      "A healthcare platform designed to connect patients with healthcare services through a modern digital experience.",
-    stack: "Python · Django · SQLite",
-  },
-  {
-    number: "02",
-    name: "Todo Application",
-    category: "Web Application",
-    description:
-      "A simple and functional task management application built to organize everyday activities.",
-    stack: "Next.js · MongoDB · Node.js",
-  },
-  {
-    number: "03",
-    name: "Personal Portfolio",
-    category: "Personal Project",
-    description:
-      "A personal space to showcase my journey, technical skills and selected development projects.",
-    stack: "Next.js · MongoDB · Tailwind CSS",
-  },
-];
 
-export default function Home() {
+
+export default async function Home() {
+  let projects = [];
+  let skillsData = [];
+
+  try {
+    const data = await getData("/api/projects");
+    projects = data.projects || [];
+  } catch (error) {
+    console.error("Projects fetch error:", error);
+  }
   return (
     <main>
       {/* Navigation */}
@@ -184,15 +168,26 @@ export default function Home() {
         </div>
 
         <div className="project-list">
-          {projects.map((project) => (
-            <article className="project-card" key={project.number}>
-              <span className="project-number">{project.number}</span>
+          {projects.map((project, index) => (
+            <article className="project-card" key={project._id}>
+              <span className="project-number">
+                {String(index + 1).padStart(2, "0")}
+              </span>
 
               <div className="project-info">
-                <span className="project-category">{project.category}</span>
-                <h3>{project.name}</h3>
+                <span className="project-category">
+                  Development Project
+                </span>
+
+                <h3>{project.title}</h3>
+
                 <p>{project.description}</p>
-                <span className="project-stack">{project.stack}</span>
+
+                <span className="project-stack">
+                  {Array.isArray(project.technologies)
+                    ? project.technologies.join(" · ")
+                    : project.technologies}
+                </span>
               </div>
 
               <span className="project-arrow">↗</span>

@@ -2,6 +2,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const Experience = require("../models/Experience");
+const authMiddleware = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
@@ -57,7 +58,7 @@ router.get("/:id", async (req, res) => {
 });
 
 // POST: Add experience
-router.post("/", async (req, res) => {
+router.post("/", authMiddleware, async (req, res) => {
     try {
         const experience = await Experience.create(req.body);
 
@@ -75,7 +76,7 @@ router.post("/", async (req, res) => {
 });
 
 // PUT: Update experience
-router.put("/:id", async (req, res) => {
+router.put("/:id", authMiddleware, async (req, res) => {
     try {
         if (!mongoose.isValidObjectId(req.params.id)) {
             return res.status(400).json({
@@ -114,7 +115,7 @@ router.put("/:id", async (req, res) => {
 });
 
 // DELETE: Remove experience
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", authMiddleware, async (req, res) => {
     try {
         if (!mongoose.isValidObjectId(req.params.id)) {
             return res.status(400).json({

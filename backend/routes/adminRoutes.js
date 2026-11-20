@@ -9,6 +9,14 @@ const router = express.Router();
 // Admin Registration
 router.post("/register", async (req, res) => {
     try {
+        const adminCount = await Admin.countDocuments();
+
+        if (adminCount > 0) {
+            return res.status(403).json({
+                success: false,
+                message: "Admin registration is disabled",
+            });
+        }
         const { name, email, password } = req.body;
 
         if (!name || !email || !password) {

@@ -2,6 +2,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const router = express.Router();
+const authMiddleware = require("../middleware/authMiddleware");
 
 const Certification = require("../models/Certification");
 
@@ -26,7 +27,7 @@ router.get("/", async (req, res) => {
 });
 
 // POST - Add certification
-router.post("/", async (req, res) => {
+router.post("/", authMiddleware, async (req, res) => {
     try {
         const certification = await Certification.create(req.body);
 
@@ -44,7 +45,7 @@ router.post("/", async (req, res) => {
 });
 
 // PUT - Update certification
-router.put("/:id", async (req, res) => {
+router.put("/:id", authMiddleware, async (req, res) => {
     try {
         if (!mongoose.isValidObjectId(req.params.id)) {
             return res.status(400).json({
@@ -80,7 +81,7 @@ router.put("/:id", async (req, res) => {
 });
 
 // DELETE - Delete certification
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", authMiddleware, async (req, res) => {
     try {
         if (!mongoose.isValidObjectId(req.params.id)) {
             return res.status(400).json({
