@@ -1,20 +1,10 @@
 import { getData } from "../lib/api";
-const skills = [
-  "Python",
-  "Django",
-  "JavaScript",
-  "Node.js",
-  "Next.js",
-  "MongoDB",
-  "HTML & CSS",
-  "Tailwind CSS",
-];
-
-
+import Image from "next/image";
 
 export default async function Home() {
   let projects = [];
   let skillsData = [];
+  let about = null;
 
   try {
     const data = await getData("/api/projects");
@@ -22,6 +12,21 @@ export default async function Home() {
   } catch (error) {
     console.error("Projects fetch error:", error);
   }
+
+  try {
+    const data = await getData("/api/skills");
+    skillsData = data.skills || [];
+  } catch (error) {
+    console.error("Skills fetch error:", error);
+  }
+
+  try {
+    const data = await getData("/api/about");
+    about = data.about || null;
+  } catch (error) {
+    console.error("About fetch error:", error);
+  }
+
   return (
     <main>
       {/* Navigation */}
@@ -100,17 +105,61 @@ export default async function Home() {
         </div>
 
         <div className="about-content">
+          {/* Profile Image */}
+          {about?.profileImage ? (
+            <div className="about-image-wrapper">
+              <Image
+                src={about.profileImage}
+                alt={about.name || "Profile"}
+                width={280}
+                height={320}
+                className="about-profile-image"
+              />
+            </div>
+          ) : (
+            <div className="about-image-wrapper">
+              <div className="about-profile-placeholder">
+                <span>{about?.name ? about.name.charAt(0).toUpperCase() : "N"}</span>
+              </div>
+            </div>
+          )}
+
+          {/* Bio Text */}
           <p className="about-intro">
-            I'm Nisha, an aspiring developer passionate about technology,
-            creativity and building useful web experiences.
+            {about?.shortBio ||
+              "I'm an aspiring developer passionate about technology, creativity and building useful web experiences."}
           </p>
 
           <p className="about-description">
-            My journey started with learning programming and gradually
-            exploring web development. I enjoy understanding how things
-            work behind the scenes, solving problems and continuously
-            improving my skills through practical projects.
+            {about?.description ||
+              "My journey started with learning programming and gradually exploring web development. I enjoy understanding how things work behind the scenes, solving problems and continuously improving my skills through practical projects."}
           </p>
+
+          {/* Meta Info: location, education, email */}
+          {about && (
+            <ul className="about-meta">
+              {about.location && (
+                <li>
+                  <span className="meta-label">Location</span>
+                  <span className="meta-value">{about.location}</span>
+                </li>
+              )}
+              {about.education && (
+                <li>
+                  <span className="meta-label">Education</span>
+                  <span className="meta-value">{about.education}</span>
+                </li>
+              )}
+              {about.email && (
+                <li>
+                  <span className="meta-label">Email</span>
+                  <a href={`mailto:${about.email}`} className="meta-value meta-link">
+                    {about.email}
+                  </a>
+                </li>
+              )}
+            </ul>
+          )}
 
           <a href="#contact" className="underlined-link">
             Let's connect <span>↗</span>
@@ -136,12 +185,12 @@ export default async function Home() {
           </p>
 
           <div className="skill-list">
-            {skills.map((skill, index) => (
-              <div className="skill-item" key={skill}>
+            {skillsData.map((skill, index) => (
+              <div className="skill-item" key={index}>
                 <span className="skill-number">
                   {String(index + 1).padStart(2, "0")}
                 </span>
-                <span>{skill}</span>
+                <span>{skill.name}</span>
                 <span className="skill-arrow">↗</span>
               </div>
             ))}
@@ -169,7 +218,7 @@ export default async function Home() {
 
         <div className="project-list">
           {projects.map((project, index) => (
-            <article className="project-card" key={project._id}>
+            <article className="project-card" key={project._id || index}>
               <span className="project-number">
                 {String(index + 1).padStart(2, "0")}
               </span>
