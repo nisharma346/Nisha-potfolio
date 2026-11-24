@@ -3,8 +3,19 @@ const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const Admin = require("../models/Admin");
+const authMiddleware = require("../middleware/authMiddleware");
 
 const router = express.Router();
+
+// Verify the signed-in admin session without exposing token contents.
+router.get("/me", authMiddleware, (req, res) => {
+    res.json({
+        success: true,
+        admin: {
+            role: req.admin.role,
+        },
+    });
+});
 
 // Admin Registration
 router.post("/register", async (req, res) => {

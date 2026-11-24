@@ -16,7 +16,10 @@ require("dotenv").config();
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+    origin: ["http://localhost:3000", "http://localhost:3001"],
+    credentials: true,
+}));
 app.use(express.json());
 
 // Project Routes
@@ -59,7 +62,7 @@ mongoose
     .then(() => {
         console.log("MongoDB Atlas Connected Successfully!");
 
-        app.listen(PORT, () => {
+        app.listen(PORT, "0.0.0.0", () => {
             console.log(`Backend server running on http://localhost:${PORT}`);
         });
     })
