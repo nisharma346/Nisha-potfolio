@@ -26,6 +26,24 @@ router.get("/", async (req, res) => {
     }
 });
 
+// GET: All experiences for admins, including hidden records
+router.get("/admin", authMiddleware, async (req, res) => {
+    try {
+        const experiences = await Experience.find().sort({ displayOrder: 1 });
+
+        res.status(200).json({
+            success: true,
+            count: experiences.length,
+            experiences,
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message,
+        });
+    }
+});
+
 // GET: Single experience
 router.get("/:id", async (req, res) => {
     try {
@@ -36,7 +54,10 @@ router.get("/:id", async (req, res) => {
             });
         }
 
-        const experience = await Experience.findById(req.params.id);
+        const experience = await Experience.findOne({
+            _id: req.params.id,
+            isVisible: true,
+        });
 
         if (!experience) {
             return res.status(404).json({

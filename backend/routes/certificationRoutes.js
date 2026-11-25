@@ -26,6 +26,26 @@ router.get("/", async (req, res) => {
     }
 });
 
+// GET all certifications for admins, including hidden records
+router.get("/admin", authMiddleware, async (req, res) => {
+    try {
+        const certifications = await Certification.find().sort({
+            displayOrder: 1,
+        });
+
+        res.status(200).json({
+            success: true,
+            count: certifications.length,
+            certifications,
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message,
+        });
+    }
+});
+
 // POST - Add certification
 router.post("/", authMiddleware, async (req, res) => {
     try {

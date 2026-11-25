@@ -216,7 +216,7 @@ function ProjectCard({ project, onEdit, onDelete, deleting }) {
     <article className="admin-project-card">
       <div className="admin-project-image">
         {project.image ? (
-          {/* eslint-disable-next-line @next/next/no-img-element */}
+          // eslint-disable-next-line @next/next/no-img-element
           <img src={project.image} alt={`${project.title} project`} />
         ) : (
           <div className="admin-project-image-empty">Project preview</div>
@@ -341,8 +341,8 @@ export default function ProjectsClient({ projects: initialProjects, initialError
         sortProjects(
           editingProject
             ? current.map((project) =>
-                project._id === savedProject._id ? savedProject : project
-              )
+              project._id === savedProject._id ? savedProject : project
+            )
             : [...current, savedProject]
         )
       );

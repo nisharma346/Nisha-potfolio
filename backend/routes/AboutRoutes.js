@@ -13,6 +13,23 @@ router.get("/", async (req, res) => {
 
         res.status(200).json({
             success: true,
+            about: about?.isVisible === false ? null : about,
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message,
+        });
+    }
+});
+
+// GET: About details for admins, including hidden information
+router.get("/admin", authMiddleware, async (req, res) => {
+    try {
+        const about = await About.findOne();
+
+        res.status(200).json({
+            success: true,
             about,
         });
     } catch (error) {

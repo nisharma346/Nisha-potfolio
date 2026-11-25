@@ -26,6 +26,24 @@ router.get("/", async (req, res) => {
     }
 });
 
+// GET: All testimonials for admins, including hidden records
+router.get("/admin", authMiddleware, async (req, res) => {
+    try {
+        const testimonials = await Testimonial.find().sort({ displayOrder: 1 });
+
+        res.status(200).json({
+            success: true,
+            count: testimonials.length,
+            testimonials,
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message,
+        });
+    }
+});
+
 // POST: Add testimonial
 router.post("/", authMiddleware, async (req, res) => {
     try {

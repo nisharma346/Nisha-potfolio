@@ -25,6 +25,24 @@ router.get("/", async (req, res) => {
     }
 });
 
+// GET: All skills for admins, including hidden skills
+router.get("/admin", authMiddleware, async (req, res) => {
+    try {
+        const skills = await Skill.find().sort({ displayOrder: 1 });
+
+        res.status(200).json({
+            success: true,
+            count: skills.length,
+            skills,
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message,
+        });
+    }
+});
+
 // GET: Single skill
 router.get("/:id", async (req, res) => {
     try {
@@ -35,7 +53,10 @@ router.get("/:id", async (req, res) => {
             });
         }
 
-        const skill = await Skill.findById(req.params.id);
+        const skill = await Skill.findOne({
+            _id: req.params.id,
+            isVisible: true,
+        });
 
         if (!skill) {
             return res.status(404).json({

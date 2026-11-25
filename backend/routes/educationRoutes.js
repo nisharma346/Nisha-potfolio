@@ -26,6 +26,24 @@ router.get("/", async (req, res) => {
     }
 });
 
+// GET: All education records for admins, including hidden records
+router.get("/admin", authMiddleware, async (req, res) => {
+    try {
+        const education = await Education.find().sort({ displayOrder: 1 });
+
+        res.status(200).json({
+            success: true,
+            count: education.length,
+            education,
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message,
+        });
+    }
+});
+
 // GET: Single education record
 router.get("/:id", async (req, res) => {
     try {
@@ -36,7 +54,10 @@ router.get("/:id", async (req, res) => {
             });
         }
 
-        const education = await Education.findById(req.params.id);
+        const education = await Education.findOne({
+            _id: req.params.id,
+            isVisible: true,
+        });
 
         if (!education) {
             return res.status(404).json({
@@ -58,7 +79,7 @@ router.get("/:id", async (req, res) => {
 });
 
 // POST: Add education
-router.post("/", async (req, res) => {
+router.post("/", authMiddleware, async (req, res) => {
     try {
         const education = await Education.create(req.body);
 
@@ -76,7 +97,7 @@ router.post("/", async (req, res) => {
 });
 
 // PUT: Update education
-router.put("/:id", async (req, res) => {
+router.put("/:id", authMiddleware, async (req, res) => {
     try {
         if (!mongoose.isValidObjectId(req.params.id)) {
             return res.status(400).json({
@@ -115,7 +136,7 @@ router.put("/:id", async (req, res) => {
 });
 
 // DELETE: Remove education
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", authMiddleware, async (req, res) => {
     try {
         if (!mongoose.isValidObjectId(req.params.id)) {
             return res.status(400).json({

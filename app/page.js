@@ -1,5 +1,6 @@
 import { getData } from "../lib/api";
 import Image from "next/image";
+import ContactForm from "./contact-form";
 
 export default async function Home() {
   let projects = [];
@@ -27,12 +28,15 @@ export default async function Home() {
     console.error("About fetch error:", error);
   }
 
+  const displayName = about?.name || "Nisha";
+  const monogram = displayName.charAt(0).toUpperCase();
+
   return (
     <main>
       {/* Navigation */}
       <nav className="navbar">
         <a href="#home" className="logo">
-          N<span>.</span>
+          {monogram}<span>.</span>
         </a>
 
         <div className="nav-links">
@@ -52,10 +56,10 @@ export default async function Home() {
         <div className="hero-content">
           <div className="availability">
             <span className="status-dot"></span>
-            Aspiring Full-Stack Developer
+            {about?.role || "Aspiring Full-Stack Developer"}
           </div>
 
-          <p className="eyebrow">HELLO, I'M NISHA</p>
+          <p className="eyebrow">HELLO, I'M {displayName.toUpperCase()}</p>
 
           <h1>
             Creating digital
@@ -82,9 +86,9 @@ export default async function Home() {
         </div>
 
         <div className="hero-side">
-          <div className="hero-monogram">N.</div>
+          <div className="hero-monogram">{monogram}.</div>
           <p>DESIGNING · DEVELOPING · LEARNING</p>
-          <span>BASED IN INDIA</span>
+          <span>{about?.location ? `BASED IN ${about.location.toUpperCase()}` : "BASED IN INDIA"}</span>
         </div>
 
         <div className="hero-bottom">
@@ -186,7 +190,7 @@ export default async function Home() {
 
           <div className="skill-list">
             {skillsData.map((skill, index) => (
-              <div className="skill-item" key={index}>
+              <div className="skill-item" key={skill._id || skill.name}>
                 <span className="skill-number">
                   {String(index + 1).padStart(2, "0")}
                 </span>
@@ -260,18 +264,16 @@ export default async function Home() {
           connecting with people who love building meaningful things.
         </p>
 
-        <a href="mailto:your-email@example.com" className="primary-button">
-          Say Hello <span>↗</span>
-        </a>
+        <ContactForm email={about?.email || ""} />
       </section>
 
       {/* Footer */}
       <footer className="footer">
         <a href="#home" className="logo">
-          N<span>.</span>
+          {monogram}<span>.</span>
         </a>
 
-        <p>Designed & built with care by Nisha.</p>
+        <p>Designed & built with care by {displayName}.</p>
 
         <a href="#home">Back to top ↑</a>
       </footer>
