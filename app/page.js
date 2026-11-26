@@ -1,55 +1,62 @@
 import { getData } from "../lib/api";
 import Image from "next/image";
 import ContactForm from "./contact-form";
+import Navbar from "../components/layout/Navbar";
 
 export default async function Home() {
   let projects = [];
   let skillsData = [];
   let about = null;
+  let projectsUnavailable = false;
+  let skillsUnavailable = false;
+  let aboutUnavailable = false;
 
-  try {
-    const data = await getData("/api/projects");
-    projects = data.projects || [];
-  } catch (error) {
-    console.error("Projects fetch error:", error);
+  const [projectsResult, skillsResult, aboutResult] = await Promise.allSettled([
+    getData("/api/projects"),
+    getData("/api/skills"),
+    getData("/api/about"),
+  ]);
+
+  if (projectsResult.status === "fulfilled" && Array.isArray(projectsResult.value.projects)) {
+    projects = projectsResult.value.projects;
+  } else {
+    projectsUnavailable = true;
+    console.error(
+      "Projects fetch error:",
+      projectsResult.status === "rejected"
+        ? projectsResult.reason
+        : new Error("Projects response did not contain a list.")
+    );
   }
 
-  try {
-    const data = await getData("/api/skills");
-    skillsData = data.skills || [];
-  } catch (error) {
-    console.error("Skills fetch error:", error);
+  if (skillsResult.status === "fulfilled" && Array.isArray(skillsResult.value.skills)) {
+    skillsData = skillsResult.value.skills;
+  } else {
+    skillsUnavailable = true;
+    console.error(
+      "Skills fetch error:",
+      skillsResult.status === "rejected"
+        ? skillsResult.reason
+        : new Error("Skills response did not contain a list.")
+    );
   }
 
-  try {
-    const data = await getData("/api/about");
-    about = data.about || null;
-  } catch (error) {
-    console.error("About fetch error:", error);
+  if (aboutResult.status === "fulfilled") {
+    about = aboutResult.value.about || null;
+    aboutUnavailable = !about;
+  } else {
+    aboutUnavailable = true;
+    console.error("About fetch error:", aboutResult.reason);
   }
 
   const displayName = about?.name || "Nisha";
+  const footerName = about?.name || "Nisha Kumari";
+  const footerRole = about?.role || "Full Stack Developer";
   const monogram = displayName.charAt(0).toUpperCase();
 
   return (
     <main>
-      {/* Navigation */}
-      <nav className="navbar">
-        <a href="#home" className="logo">
-          {monogram}<span>.</span>
-        </a>
-
-        <div className="nav-links">
-          <a href="#about">About</a>
-          <a href="#skills">Skills</a>
-          <a href="#projects">Projects</a>
-          <a href="#contact">Contact</a>
-        </div>
-
-        <a href="#contact" className="nav-button">
-          Let's Talk <span>↗</span>
-        </a>
-      </nav>
+      <Navbar monogram={monogram} />
 
       {/* Hero Section */}
       <section className="hero section-container" id="home">
@@ -99,6 +106,11 @@ export default async function Home() {
 
       {/* About Section */}
       <section className="about section-container" id="about">
+        {aboutUnavailable && (
+          <p className="content-empty-state" role="status">
+            Profile details are unavailable. Temporary fallback content is shown.
+          </p>
+        )}
         <div className="section-heading">
           <span className="section-label">01 — ABOUT ME</span>
           <h2>
@@ -189,15 +201,26 @@ export default async function Home() {
           </p>
 
           <div className="skill-list">
-            {skillsData.map((skill, index) => (
-              <div className="skill-item" key={skill._id || skill.name}>
-                <span className="skill-number">
-                  {String(index + 1).padStart(2, "0")}
-                </span>
-                <span>{skill.name}</span>
-                <span className="skill-arrow">↗</span>
-              </div>
-            ))}
+            {skillsData.length > 0 ? (
+              skillsData.map((skill, index) => (
+                <div className="skill-item" key={skill._id || skill.name}>
+                  <span className="skill-number">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                  <span>{skill.name}</span>
+                  <span className="skill-arrow">↗</span>
+                </div>
+              ))
+            ) : (
+              <p
+                className="content-empty-state"
+                role={skillsUnavailable ? "alert" : "status"}
+              >
+                {skillsUnavailable
+                  ? "Skills could not be loaded right now."
+                  : "No skills have been added yet."}
+              </p>
+            )}
           </div>
         </div>
       </section>
@@ -221,31 +244,65 @@ export default async function Home() {
         </div>
 
         <div className="project-list">
-          {projects.map((project, index) => (
-            <article className="project-card" key={project._id || index}>
-              <span className="project-number">
-                {String(index + 1).padStart(2, "0")}
-              </span>
-
-              <div className="project-info">
-                <span className="project-category">
-                  Development Project
+          {projects.length > 0 ? (
+            projects.map((project, index) => (
+              <article className="project-card" key={project._id || index}>
+                <span className="project-number">
+                  {String(index + 1).padStart(2, "0")}
                 </span>
 
-                <h3>{project.title}</h3>
+                <div className="project-info">
+                  <span className="project-category">
+                    Development Project
+                  </span>
 
-                <p>{project.description}</p>
+                  <h3>{project.title}</h3>
 
-                <span className="project-stack">
-                  {Array.isArray(project.technologies)
-                    ? project.technologies.join(" · ")
-                    : project.technologies}
-                </span>
-              </div>
+                  <p>{project.description}</p>
 
-              <span className="project-arrow">↗</span>
-            </article>
-          ))}
+                  <span className="project-stack">
+                    {Array.isArray(project.technologies)
+                      ? project.technologies.join(" · ")
+                      : project.technologies}
+                  </span>
+
+                  {(project.liveUrl || project.githubUrl) && (
+                    <div className="project-links">
+                      {project.liveUrl && (
+                        <a
+                          href={project.liveUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          aria-label={`Open ${project.title} live site`}
+                        >
+                          Live site <span aria-hidden="true">↗</span>
+                        </a>
+                      )}
+                      {project.githubUrl && (
+                        <a
+                          href={project.githubUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          aria-label={`View ${project.title} source on GitHub`}
+                        >
+                          Source code <span aria-hidden="true">↗</span>
+                        </a>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </article>
+            ))
+          ) : (
+            <p
+              className="content-empty-state"
+              role={projectsUnavailable ? "alert" : "status"}
+            >
+              {projectsUnavailable
+                ? "Projects could not be loaded right now."
+                : "No projects have been added yet."}
+            </p>
+          )}
         </div>
       </section>
 
@@ -269,13 +326,60 @@ export default async function Home() {
 
       {/* Footer */}
       <footer className="footer">
-        <a href="#home" className="logo">
-          {monogram}<span>.</span>
-        </a>
+        <div className="footer-main">
+          <section className="footer-brand" aria-labelledby="footer-brand-title">
+            <h2 className="footer-brand-name" id="footer-brand-title">{footerName}</h2>
+            <p className="footer-role">{footerRole}</p>
+            <p className="footer-tagline">
+              {about?.shortBio || "Building thoughtful digital experiences with care."}
+            </p>
+            {(about?.github || about?.linkedin) && (
+              <div className="footer-social-links" aria-label="Social profiles">
+                {about?.github && (
+                  <a href={about.github} target="_blank" rel="noreferrer" aria-label="GitHub profile">
+                    GitHub <span aria-hidden="true">↗</span>
+                  </a>
+                )}
+                {about?.linkedin && (
+                  <a href={about.linkedin} target="_blank" rel="noreferrer" aria-label="LinkedIn profile">
+                    LinkedIn <span aria-hidden="true">↗</span>
+                  </a>
+                )}
+              </div>
+            )}
+          </section>
 
-        <p>Designed & built with care by {displayName}.</p>
+          <nav className="footer-column" aria-label="Footer navigation">
+            <h2 className="footer-heading">Quick links</h2>
+            <ul className="footer-link-list">
+              <li><a href="#home">Home</a></li>
+              <li><a href="#about">About</a></li>
+              <li><a href="#skills">Skills</a></li>
+              <li><a href="#projects">Projects</a></li>
+              <li><a href="#contact">Contact</a></li>
+            </ul>
+          </nav>
 
-        <a href="#home">Back to top ↑</a>
+          <section className="footer-column" aria-labelledby="footer-contact-title">
+            <h2 className="footer-heading" id="footer-contact-title">Get in touch</h2>
+            <ul className="footer-link-list footer-contact-list">
+              {about?.email && (
+                <li><a href={`mailto:${about.email}`}>{about.email}</a></li>
+              )}
+              {about?.github && (
+                <li><a href={about.github} target="_blank" rel="noreferrer">GitHub profile <span aria-hidden="true">↗</span></a></li>
+              )}
+              {about?.linkedin && (
+                <li><a href={about.linkedin} target="_blank" rel="noreferrer">LinkedIn profile <span aria-hidden="true">↗</span></a></li>
+              )}
+            </ul>
+          </section>
+        </div>
+
+        <div className="footer-bottom">
+          <p>© {new Date().getFullYear()} {footerName}. All rights reserved.</p>
+          <p>Designed &amp; Developed by {footerName}</p>
+        </div>
       </footer>
     </main>
   );
