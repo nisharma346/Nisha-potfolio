@@ -1,5 +1,6 @@
 
 const express = require("express");
+const sendApiError = require("../utils/apiError");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const Admin = require("../models/Admin");
@@ -17,75 +18,17 @@ router.get("/me", authMiddleware, (req, res) => {
     });
 });
 
-// Admin Registration
-router.post("/register", async (req, res) => {
-    try {
-        const adminCount = await Admin.countDocuments();
-
-        if (adminCount > 0) {
-            return res.status(403).json({
-                success: false,
-                message: "Admin registration is disabled",
-            });
-        }
-        const { name, email, password } = req.body;
-
-        if (!name || !email || !password) {
-            return res.status(400).json({
-                success: false,
-                message: "All fields are required",
-            });
-        }
-
-        if (password.length < 8) {
-            return res.status(400).json({
-                success: false,
-                message: "Password must be at least 8 characters",
-            });
-        }
-
-        const existingAdmin = await Admin.findOne({
-            email: email.toLowerCase(),
-        });
-
-        if (existingAdmin) {
-            return res.status(409).json({
-                success: false,
-                message: "Admin already exists",
-            });
-        }
-
-        const hashedPassword = await bcrypt.hash(password, 12);
-
-        const admin = await Admin.create({
-            name,
-            email,
-            password: hashedPassword,
-        });
-
-        res.status(201).json({
-            success: true,
-            message: "Admin registered successfully!",
-            admin: {
-                id: admin._id,
-                name: admin.name,
-                email: admin.email,
-            },
-        });
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: error.message,
-        });
-    }
-});
-
 // Admin Login
 router.post("/login", async (req, res) => {
     try {
-        const { email, password } = req.body;
+        const { email, password } = req.body || {};
 
-        if (!email || !password) {
+        if (
+            typeof email !== "string" ||
+            !email.trim() ||
+            typeof password !== "string" ||
+            !password
+        ) {
             return res.status(400).json({
                 success: false,
                 message: "Email and password are required",
@@ -93,7 +36,7 @@ router.post("/login", async (req, res) => {
         }
 
         const admin = await Admin.findOne({
-            email: email.toLowerCase(),
+            email: email.trim().toLowerCase(),
         });
 
         if (!admin) {
@@ -142,10 +85,7 @@ router.post("/login", async (req, res) => {
             },
         });
     } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: error.message,
-        });
+        return sendApiError(res, error);
     }
 });
 

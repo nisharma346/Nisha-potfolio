@@ -1,5 +1,6 @@
 
 const express = require("express");
+const sendApiError = require("../utils/apiError");
 const mongoose = require("mongoose");
 const router = express.Router();
 const authMiddleware = require("../middleware/authMiddleware");
@@ -19,10 +20,7 @@ router.get("/", async (req, res) => {
             certifications,
         });
     } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: error.message,
-        });
+        return sendApiError(res, error);
     }
 });
 
@@ -39,10 +37,7 @@ router.get("/admin", authMiddleware, async (req, res) => {
             certifications,
         });
     } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: error.message,
-        });
+        return sendApiError(res, error);
     }
 });
 
@@ -57,10 +52,7 @@ router.post("/", authMiddleware, async (req, res) => {
             certification,
         });
     } catch (error) {
-        res.status(400).json({
-            success: false,
-            message: error.message,
-        });
+        return sendApiError(res, error);
     }
 });
 
@@ -93,10 +85,7 @@ router.put("/:id", authMiddleware, async (req, res) => {
             certification,
         });
     } catch (error) {
-        res.status(400).json({
-            success: false,
-            message: error.message,
-        });
+        return sendApiError(res, error);
     }
 });
 
@@ -126,10 +115,7 @@ router.delete("/:id", authMiddleware, async (req, res) => {
             message: "Certification deleted successfully!",
         });
     } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: error.message,
-        });
+        return sendApiError(res, error);
     }
 });
 

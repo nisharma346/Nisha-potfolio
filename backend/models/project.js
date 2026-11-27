@@ -22,6 +22,12 @@ const projectSchema = new mongoose.Schema(
         image: {
             type: String,
             default: "",
+            validate: {
+                validator: (value) =>
+                    typeof value === "string" &&
+                    !/^(?:[a-z]:[\\/]|\\\\|file:)/i.test(value.trim()),
+                message: "Project image must be a public URL, not a local file path.",
+            },
         },
 
         liveUrl: {

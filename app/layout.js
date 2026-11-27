@@ -1,5 +1,6 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import "../styles/portfolio.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -12,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Portfolio | Full-Stack Developer",
+  title: "Nisha Kumari | Full Stack Developer",
   description:
-    "A web development portfolio showcasing selected projects and technical skills.",
+    "Explore Nisha Kumari's full stack development projects, skills, experience, and portfolio.",
 };
 
 export default function RootLayout({ children }) {

@@ -1,5 +1,6 @@
 
 const express = require("express");
+const sendApiError = require("../utils/apiError");
 const mongoose = require("mongoose");
 const Contact = require("../models/Contact");
 const authMiddleware = require("../middleware/authMiddleware");
@@ -17,30 +18,35 @@ router.get("/", authMiddleware, async (req, res) => {
             contacts,
         });
     } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: error.message,
-        });
+        return sendApiError(res, error);
     }
 });
 
 // POST: Submit contact message
 router.post("/", async (req, res) => {
     try {
-        const { name, email, subject, message } = req.body;
+        const { name, email, subject, message } = req.body || {};
 
-        if (!name || !email || !subject || !message) {
+        const values = [name, email, subject, message];
+        if (values.some((value) => typeof value !== "string" || !value.trim())) {
             return res.status(400).json({
                 success: false,
                 message: "All fields are required",
             });
         }
 
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+            return res.status(400).json({
+                success: false,
+                message: "Please provide a valid email address",
+            });
+        }
+
         const contact = await Contact.create({
-            name,
-            email,
-            subject,
-            message,
+            name: name.trim(),
+            email: email.trim().toLowerCase(),
+            subject: subject.trim(),
+            message: message.trim(),
         });
 
         res.status(201).json({
@@ -50,10 +56,7 @@ router.post("/", async (req, res) => {
         });
 
     } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: error.message,
-        });
+        return sendApiError(res, error);
     }
 });
 
@@ -94,10 +97,7 @@ router.put("/:id", authMiddleware, async (req, res) => {
             contact,
         });
     } catch (error) {
-        res.status(400).json({
-            success: false,
-            message: error.message,
-        });
+        return sendApiError(res, error);
     }
 });
 
@@ -125,10 +125,7 @@ router.delete("/:id", authMiddleware, async (req, res) => {
             message: "Contact message deleted successfully!",
         });
     } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: error.message,
-        });
+        return sendApiError(res, error);
     }
 });
 

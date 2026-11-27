@@ -16,8 +16,17 @@ require("dotenv").config();
 const app = express();
 
 // Middleware
+const allowedOrigins = [
+    "http://localhost:3000",
+    "http://localhost:3001",
+    ...(process.env.CORS_ORIGINS || "")
+        .split(",")
+        .map((origin) => origin.trim())
+        .filter(Boolean),
+];
+
 app.use(cors({
-    origin: ["http://localhost:3000", "http://localhost:3001"],
+    origin: allowedOrigins,
     credentials: true,
 }));
 app.use(express.json());
@@ -67,5 +76,5 @@ mongoose
         });
     })
     .catch((error) => {
-        console.error("MongoDB Connection Failed:", error.message);
+        console.error("MongoDB Connection Failed:", error.name || "Error");
     });

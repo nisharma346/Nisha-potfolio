@@ -1,8 +1,15 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { createProject, removeProject, updateProject } from "./actions";
+
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
+const ALLOWED_IMAGE_TYPES = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+]);
 
 const emptyForm = {
   title: "",
@@ -53,7 +60,106 @@ function formatProjectPayload(form) {
   };
 }
 
-function ProjectForm({ form, editing, pending, onChange, onClose, onSubmit }) {
+function isPublicImageSource(source) {
+  if (typeof source !== "string" || !source.trim()) return false;
+  if (source.startsWith("/") && !source.startsWith("//")) return true;
+
+  try {
+    const url = new URL(source);
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+async function uploadProjectImage(file) {
+  const formData = new FormData();
+  formData.append("image", file);
+
+  let response;
+  try {
+    response = await fetch("/api/admin/projects/upload-image", {
+      method: "POST",
+      body: formData,
+    });
+  } catch {
+    throw new Error("Image upload failed because the server is unavailable.");
+  }
+
+  let responseBody;
+  try {
+    responseBody = await response.text();
+  } catch {
+    throw new Error("The upload service response could not be read.");
+  }
+
+  let data;
+  try {
+    data = JSON.parse(responseBody);
+  } catch {
+    throw new Error(
+      `The upload endpoint returned a non-JSON response (HTTP ${response.status}).`
+    );
+  }
+
+  if (
+    !response.ok ||
+    data?.success !== true ||
+    typeof data?.imageUrl !== "string"
+  ) {
+    throw new Error(data?.message || "Unable to upload the project image.");
+  }
+
+  return data.imageUrl;
+}
+
+function ProjectForm({
+  form,
+  imageFile,
+  formError,
+  editing,
+  pending,
+  uploadingImage,
+  onChange,
+  onClearFormError,
+  onImageFileChange,
+  onClose,
+  onSubmit,
+}) {
+  const [imagePreview, setImagePreview] = useState("");
+  const [imageFileError, setImageFileError] = useState("");
+
+  useEffect(() => {
+    if (!imageFile || !imagePreview) return undefined;
+    return () => URL.revokeObjectURL(imagePreview);
+  }, [imageFile, imagePreview]);
+
+  function handleImageSelection(event) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+
+    if (!file) return;
+    if (!ALLOWED_IMAGE_TYPES.has(file.type)) {
+      setImageFileError("Choose a JPG, JPEG, PNG, or WEBP image.");
+      return;
+    }
+    if (file.size > MAX_IMAGE_SIZE) {
+      setImageFileError("Image files must be 5 MB or smaller.");
+      return;
+    }
+
+    setImageFileError("");
+    onClearFormError();
+    setImagePreview(URL.createObjectURL(file));
+    onImageFileChange(file);
+  }
+
+  const previewSource = imageFile
+    ? imagePreview
+    : isPublicImageSource(form.image)
+      ? form.image
+      : "";
+
   return (
     <div
       className="admin-project-modal-backdrop"
@@ -87,7 +193,16 @@ function ProjectForm({ form, editing, pending, onChange, onClose, onSubmit }) {
           </button>
         </header>
 
-        <form className="admin-project-form" onSubmit={onSubmit}>
+        <form
+          className="admin-project-form"
+          onSubmit={(event) => {
+            if (imageFileError) {
+              event.preventDefault();
+              return;
+            }
+            onSubmit(event);
+          }}
+        >
           <label className="admin-project-field">
             <span>Title</span>
             <input
@@ -125,15 +240,70 @@ function ProjectForm({ form, editing, pending, onChange, onClose, onSubmit }) {
             <small>Separate technologies with commas.</small>
           </label>
 
-          <label className="admin-project-field">
-            <span>Image URL</span>
-            <input
-              type="text"
-              value={form.image}
-              onChange={(event) => onChange("image", event.target.value)}
-              placeholder="https://example.com/project-image.jpg"
-            />
-          </label>
+          <div className="admin-project-field">
+            <span>Upload Image</span>
+            <div className="admin-project-upload-row">
+              <div className="admin-project-upload-preview">
+                {previewSource ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={previewSource}
+                    alt={`${form.title || "Project"} image preview`}
+                  />
+                ) : (
+                  <span>Project preview</span>
+                )}
+              </div>
+              <div className="admin-project-upload-controls">
+                <label className="admin-project-upload-control">
+                  <input
+                    type="file"
+                    accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                    onChange={handleImageSelection}
+                    disabled={pending}
+                    aria-label="Choose a project image"
+                  />
+                  <span>Choose File</span>
+                </label>
+                {imageFile && (
+                  <button
+                    type="button"
+                    className="admin-project-clear-upload"
+                    onClick={() => {
+                      onImageFileChange(null);
+                      setImagePreview("");
+                      setImageFileError("");
+                      onClearFormError();
+                    }}
+                    disabled={pending}
+                  >
+                    Remove selected image
+                  </button>
+                )}
+                <small>
+                  {imageFile
+                    ? imageFile.name
+                    : "JPG, JPEG, PNG, or WEBP. Maximum 5 MB."}
+                </small>
+                {uploadingImage && (
+                  <small role="status" aria-live="polite">
+                    Uploading image…
+                  </small>
+                )}
+                {imageFileError && (
+                  <small className="admin-project-upload-error" role="alert">
+                    {imageFileError}
+                  </small>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {formError && (
+            <p className="admin-project-form-error" role="alert">
+              {formError}
+            </p>
+          )}
 
           <div className="admin-project-form-row">
             <label className="admin-project-field">
@@ -199,7 +369,9 @@ function ProjectForm({ form, editing, pending, onChange, onClose, onSubmit }) {
               disabled={pending}
             >
               {pending
-                ? "Saving…"
+                ? uploadingImage
+                  ? "Uploading image…"
+                  : "Saving…"
                 : editing
                   ? "Save changes"
                   : "Add project"}
@@ -297,7 +469,10 @@ export default function ProjectsClient({ projects: initialProjects, initialError
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingProject, setEditingProject] = useState(null);
   const [form, setForm] = useState(emptyForm);
+  const [formError, setFormError] = useState("");
+  const [imageFile, setImageFile] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [deletingId, setDeletingId] = useState("");
   const [isRefreshing, startRefresh] = useTransition();
 
@@ -305,6 +480,8 @@ export default function ProjectsClient({ projects: initialProjects, initialError
     setNotice(null);
     setEditingProject(null);
     setForm(emptyForm);
+    setFormError("");
+    setImageFile(null);
     setIsFormOpen(true);
   }
 
@@ -312,6 +489,8 @@ export default function ProjectsClient({ projects: initialProjects, initialError
     setNotice(null);
     setEditingProject(project);
     setForm(projectToForm(project));
+    setFormError("");
+    setImageFile(null);
     setIsFormOpen(true);
   }
 
@@ -319,19 +498,31 @@ export default function ProjectsClient({ projects: initialProjects, initialError
     if (saving) return;
     setIsFormOpen(false);
     setEditingProject(null);
+    setFormError("");
+    setImageFile(null);
   }
 
   function updateField(field, value) {
+    setFormError("");
     setForm((current) => ({ ...current, [field]: value }));
   }
 
   async function handleSubmit(event) {
     event.preventDefault();
     setNotice(null);
+    setFormError("");
+
     setSaving(true);
 
     try {
       const payload = formatProjectPayload(form);
+      if (imageFile) {
+        setUploadingImage(true);
+        payload.image = await uploadProjectImage(imageFile);
+        updateField("image", payload.image);
+        setImageFile(null);
+      }
+
       const response = editingProject
         ? await updateProject(editingProject._id, payload)
         : await createProject(payload);
@@ -349,19 +540,19 @@ export default function ProjectsClient({ projects: initialProjects, initialError
       setLoadError("");
       setIsFormOpen(false);
       setEditingProject(null);
+      setFormError("");
       setNotice({
         type: "success",
         message: response.message || "Project saved successfully.",
       });
     } catch (error) {
-      setNotice({
-        type: "error",
-        message:
-          error.message === "BACKEND_UNAVAILABLE"
-            ? "The backend is unavailable. Please try again."
-            : error.message || "Unable to save the project.",
-      });
+      setFormError(
+        error.message === "BACKEND_UNAVAILABLE"
+          ? "The backend is unavailable. Please try again."
+          : error.message || "Unable to save the project."
+      );
     } finally {
+      setUploadingImage(false);
       setSaving(false);
     }
   }
@@ -483,9 +674,14 @@ export default function ProjectsClient({ projects: initialProjects, initialError
       {isFormOpen && (
         <ProjectForm
           form={form}
+          imageFile={imageFile}
+          formError={formError}
           editing={Boolean(editingProject)}
           pending={saving}
+          uploadingImage={uploadingImage}
           onChange={updateField}
+          onClearFormError={() => setFormError("")}
+          onImageFileChange={setImageFile}
           onClose={closeForm}
           onSubmit={handleSubmit}
         />

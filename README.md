@@ -34,3 +34,9 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Backend deployment settings
+
+The backend allows `http://localhost:3000` and `http://localhost:3001` by default. Set `CORS_ORIGINS` in `backend/.env` to a comma-separated list of deployed frontend origins, without trailing slashes.
+
+To bootstrap the first admin, configure `ADMIN_NAME`, `ADMIN_EMAIL`, and `ADMIN_PASSWORD` in `backend/.env`, then run `node backend/scripts/setupAdmin.js`. The script only creates an admin when none exists; it never resets an existing account or prints credentials.

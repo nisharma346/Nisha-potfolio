@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -75,9 +76,9 @@ export default function AdminLoginPage() {
 
           {/* Header */}
           <div className="admin-login-header">
-            <a href="/" className="admin-login-logo" aria-label="Back to portfolio">
+            <Link href="/" className="admin-login-logo" aria-label="Back to portfolio">
               N<span>.</span>
-            </a>
+            </Link>
             <span className="admin-login-eyebrow">ADMIN PORTAL</span>
             <h1 className="admin-login-title">
               Welcome <span>back.</span>
@@ -188,9 +189,9 @@ export default function AdminLoginPage() {
 
           {/* Footer link */}
           <div className="admin-login-back">
-            <a href="/" className="admin-login-back-link">
+            <Link href="/" className="admin-login-back-link">
               ← Back to portfolio
-            </a>
+            </Link>
           </div>
         </div>
 

@@ -1,61 +1,59 @@
 /**
- * Admin Setup / Reset Script
- * Run: node scripts/setupAdmin.js
- *
- * - If no admin exists → creates one
- * - If admin exists    → resets the password to the one below
+ * Bootstrap the first admin account.
+ * Run from any directory with ADMIN_NAME, ADMIN_EMAIL, and ADMIN_PASSWORD set.
+ * Existing admin accounts are never modified by this script.
  */
 
-require("dotenv").config({ path: "../.env" });
+const path = require("path");
+require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
+
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const Admin = require("../models/Admin");
 
-// ─── SET YOUR DESIRED CREDENTIALS HERE ───────────────────────────────────────
-const ADMIN_EMAIL    = "nisharma346@gmail.com";
-const ADMIN_NAME     = "Nisha";
-const ADMIN_PASSWORD = "Nisha@123";          // change to whatever you want
-// ─────────────────────────────────────────────────────────────────────────────
+const adminName = process.env.ADMIN_NAME?.trim();
+const adminEmail = process.env.ADMIN_EMAIL?.trim().toLowerCase();
+const adminPassword = process.env.ADMIN_PASSWORD;
 
 async function setup() {
   if (!process.env.MONGO_URI) {
-    console.error("❌  MONGO_URI not found in .env — make sure .env exists in backend/");
-    process.exit(1);
+    throw new Error("MONGO_URI must be configured in backend/.env.");
   }
 
-  console.log("🔗  Connecting to MongoDB Atlas…");
+  if (!adminName || !adminEmail || !adminPassword) {
+    throw new Error(
+      "ADMIN_NAME, ADMIN_EMAIL, and ADMIN_PASSWORD must be configured before running this script."
+    );
+  }
+
+  if (adminPassword.length < 8) {
+    throw new Error("ADMIN_PASSWORD must be at least 8 characters.");
+  }
+
   await mongoose.connect(process.env.MONGO_URI);
-  console.log("✅  Connected!\n");
 
-  const hashed = await bcrypt.hash(ADMIN_PASSWORD, 12);
+  try {
+    if (await Admin.exists({})) {
+      console.error("An administrator already exists; no changes were made.");
+      process.exitCode = 1;
+      return;
+    }
 
-  const existing = await Admin.findOne({ email: ADMIN_EMAIL.toLowerCase() });
-
-  if (existing) {
-    // Reset password
-    existing.password = hashed;
-    await existing.save();
-    console.log(`✅  Admin found — password reset successfully!`);
-    console.log(`    Email   : ${ADMIN_EMAIL}`);
-    console.log(`    Password: ${ADMIN_PASSWORD}`);
-  } else {
-    // Create new admin
+    const hashedPassword = await bcrypt.hash(adminPassword, 12);
     await Admin.create({
-      name     : ADMIN_NAME,
-      email    : ADMIN_EMAIL.toLowerCase(),
-      password : hashed,
-      role     : "admin",
+      name: adminName,
+      email: adminEmail,
+      password: hashedPassword,
+      role: "admin",
     });
-    console.log(`✅  New admin created!`);
-    console.log(`    Email   : ${ADMIN_EMAIL}`);
-    console.log(`    Password: ${ADMIN_PASSWORD}`);
-  }
 
-  await mongoose.disconnect();
-  console.log("\n🎉  Done! You can now login at http://localhost:3000/admin/login");
+    console.log("Admin account created. Credentials were not printed.");
+  } finally {
+    await mongoose.disconnect();
+  }
 }
 
-setup().catch((err) => {
-  console.error("❌  Error:", err.message);
-  process.exit(1);
+setup().catch((error) => {
+  console.error("Admin bootstrap failed:", error.name || "Error");
+  process.exitCode = 1;
 });

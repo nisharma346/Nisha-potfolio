@@ -1,5 +1,6 @@
 
 const express = require("express");
+const sendApiError = require("../utils/apiError");
 const mongoose = require("mongoose");
 const Education = require("../models/Education");
 const authMiddleware = require("../middleware/authMiddleware");
@@ -19,10 +20,7 @@ router.get("/", async (req, res) => {
             education,
         });
     } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: error.message,
-        });
+        return sendApiError(res, error);
     }
 });
 
@@ -37,10 +35,7 @@ router.get("/admin", authMiddleware, async (req, res) => {
             education,
         });
     } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: error.message,
-        });
+        return sendApiError(res, error);
     }
 });
 
@@ -71,10 +66,7 @@ router.get("/:id", async (req, res) => {
             education,
         });
     } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: error.message,
-        });
+        return sendApiError(res, error);
     }
 });
 
@@ -89,10 +81,7 @@ router.post("/", authMiddleware, async (req, res) => {
             education,
         });
     } catch (error) {
-        res.status(400).json({
-            success: false,
-            message: error.message,
-        });
+        return sendApiError(res, error);
     }
 });
 
@@ -128,10 +117,7 @@ router.put("/:id", authMiddleware, async (req, res) => {
             education,
         });
     } catch (error) {
-        res.status(400).json({
-            success: false,
-            message: error.message,
-        });
+        return sendApiError(res, error);
     }
 });
 
@@ -161,10 +147,7 @@ router.delete("/:id", authMiddleware, async (req, res) => {
             message: "Education deleted successfully!",
         });
     } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: error.message,
-        });
+        return sendApiError(res, error);
     }
 });
 

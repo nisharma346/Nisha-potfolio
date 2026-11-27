@@ -29,9 +29,14 @@ function normalizeProject(project) {
         .filter(Boolean)
     : null;
   const displayOrder = Number(project.displayOrder);
+  const image = typeof project.image === "string" ? project.image.trim() : "";
 
   if (!title || !description || technologies === null) {
     throw new Error("Title, description, and technologies are required.");
+  }
+
+  if (/^(?:[a-z]:[\\/]|\\\\|file:)/i.test(image)) {
+    throw new Error("Project images must use a public URL, not a local file path.");
   }
 
   if (
@@ -46,7 +51,7 @@ function normalizeProject(project) {
     title,
     description,
     technologies,
-    image: typeof project.image === "string" ? project.image.trim() : "",
+    image,
     liveUrl: typeof project.liveUrl === "string" ? project.liveUrl.trim() : "",
     githubUrl:
       typeof project.githubUrl === "string" ? project.githubUrl.trim() : "",
