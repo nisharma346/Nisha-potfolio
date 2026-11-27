@@ -202,6 +202,9 @@ export default async function Home() {
             {about?.shortBio && (
               <p className="portfolio-hero-description">{about.shortBio}</p>
             )}
+            <p className="portfolio-hero-description portfolio-hero-focus">
+              Focused on creating responsive, user-friendly and clean web interfaces.
+            </p>
             <div className="portfolio-hero-actions">
               {projects.length > 0 && (
                 <a className="portfolio-button" href="#projects">

@@ -192,6 +192,10 @@
   line-height: 1.8;
 }
 
+.portfolio-hero-focus {
+  margin-top: 8px;
+}
+
 .portfolio-hero-actions,
 .portfolio-social-links {
   display: flex;
@@ -260,7 +264,7 @@
 .portfolio-profile-frame {
   position: relative;
   width: 100%;
-  aspect-ratio: 1.1;
+  aspect-ratio: 0.92;
   overflow: hidden;
   border: 1px solid #dbeafe;
   border-radius: 17px;
@@ -270,7 +274,7 @@
 
 .portfolio-profile-image {
   object-fit: cover;
-  object-position: center 35%;
+  object-position: center top;
 }
 
 .portfolio-profile-placeholder {
@@ -1100,7 +1104,7 @@
   }
 
   .portfolio-profile-frame {
-    aspect-ratio: 1.12;
+    aspect-ratio: 0.94;
     border-radius: 13px;
   }
 
