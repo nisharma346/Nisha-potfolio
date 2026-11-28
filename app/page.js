@@ -271,7 +271,7 @@ export default async function Home() {
               <p className="portfolio-hero-description">{about.shortBio}</p>
             )}
             <p className="portfolio-hero-description portfolio-hero-focus">
-              Focused on creating responsive, user-friendly and clean web interfaces.
+              I enjoy building real-world web applications that solve practical problems, from healthcare and e-commerce platforms to dynamic portfolio systems, while continuously growing as a full-stack developer.
             </p>
             <div className="portfolio-hero-actions">
               {projects.length > 0 && (
