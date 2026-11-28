@@ -4,8 +4,15 @@ const sendApiError = require("../utils/apiError");
 const mongoose = require("mongoose");
 const router = express.Router();
 const authMiddleware = require("../middleware/authMiddleware");
+const createImageUploadMiddleware = require("../utils/cloudinaryImageUpload");
 
 const Certification = require("../models/Certification");
+
+router.post(
+    "/upload-image",
+    authMiddleware,
+    ...createImageUploadMiddleware("nisha-portfolio/certifications")
+);
 
 // GET all visible certifications
 router.get("/", async (req, res) => {

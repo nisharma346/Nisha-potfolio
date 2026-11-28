@@ -328,13 +328,21 @@ export default async function Home() {
         aria-labelledby="about-title"
       >
         <div className="portfolio-container portfolio-about-layout">
-          <SectionHeading
-            number={nextSectionNumber()}
-            eyebrow="GET TO KNOW ME"
-            title="About me"
-            description="A little introduction to my background and interests."
-            id="about-title"
-          />
+          <div className="portfolio-about-intro-column">
+            <SectionHeading
+              number={nextSectionNumber()}
+              eyebrow="GET TO KNOW ME"
+              title="About me"
+              description="A little introduction to my background and interests."
+              id="about-title"
+            />
+            <p className="portfolio-about-summary">
+              As a BCA student at Shobhit University, I enjoy building
+              real-world web applications that solve practical problems, from
+              healthcare and e-commerce platforms to dynamic portfolio systems,
+              while continuously growing as a full-stack developer.
+            </p>
+          </div>
           <div className="portfolio-about-copy">
             {aboutUnavailable && (
               <p className="portfolio-data-notice" role="status">
@@ -367,6 +375,22 @@ export default async function Home() {
                 </div>
               )}
             </div>
+            <div className="portfolio-about-social">
+              <h3>Connect with me</h3>
+              <div className="portfolio-about-social-links">
+                {socialProfiles.map((profile) => (
+                  <a
+                    href={profile.href}
+                    key={profile.label}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <ProfileIcon type={profile.icon} />
+                    {profile.label}
+                  </a>
+                ))}
+              </div>
+            </div>
             <a className="portfolio-inline-link" href="#contact">
               Let&apos;s connect <span aria-hidden="true">↗</span>
             </a>
@@ -395,12 +419,27 @@ export default async function Home() {
                   <ul>
                     {items.map((skill) => (
                       <li key={skill._id || skill.name}>
-                        <span>{skill.name}</span>
-                        {skill.proficiency > 0 && (
+                        <div className="portfolio-skill-item-heading">
+                          <span>{skill.name}</span>
                           <span className="portfolio-skill-level">
-                            {skill.proficiency}%
+                            {skill.proficiency ?? 0}%
                           </span>
-                        )}
+                        </div>
+                        <div
+                          className="portfolio-skill-progress-track"
+                          role="progressbar"
+                          aria-label={`${skill.name} proficiency`}
+                          aria-valuemin={0}
+                          aria-valuemax={100}
+                          aria-valuenow={skill.proficiency ?? 0}
+                        >
+                          <span
+                            className="portfolio-skill-progress-fill"
+                            style={{
+                              width: `${skill.proficiency ?? 0}%`,
+                            }}
+                          />
+                        </div>
                       </li>
                     ))}
                   </ul>

@@ -1,12 +1,20 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { uploadAdminImage } from "../../../lib/admin-image-upload";
 import {
   createCertification,
   removeCertification,
   updateCertification,
 } from "./actions";
+
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
+const ALLOWED_IMAGE_TYPES = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+]);
 
 const emptyForm = {
   title: "",
@@ -82,12 +90,46 @@ function safeCredentialUrl(value) {
 
 function CertificationForm({
   form,
+  imageFile,
   editing,
   pending,
+  uploadingImage,
   onChange,
+  onImageFileChange,
   onClose,
   onSubmit,
 }) {
+  const [imagePreview, setImagePreview] = useState("");
+  const [imageFileError, setImageFileError] = useState("");
+
+  useEffect(() => {
+    if (!imageFile || !imagePreview) return undefined;
+    return () => URL.revokeObjectURL(imagePreview);
+  }, [imageFile, imagePreview]);
+
+  function handleImageSelection(event) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+
+    if (!file) return;
+    if (!ALLOWED_IMAGE_TYPES.has(file.type)) {
+      onImageFileChange(null);
+      setImagePreview("");
+      setImageFileError("Choose a JPG, JPEG, PNG, or WEBP image.");
+      return;
+    }
+    if (file.size > MAX_IMAGE_SIZE) {
+      onImageFileChange(null);
+      setImagePreview("");
+      setImageFileError("Image files must be 5 MB or smaller.");
+      return;
+    }
+
+    setImageFileError("");
+    setImagePreview(URL.createObjectURL(file));
+    onImageFileChange(file);
+  }
+
   return (
     <div
       className="admin-project-modal-backdrop"
@@ -186,6 +228,72 @@ function CertificationForm({
             </label>
           </div>
 
+          <div className="admin-project-field">
+            <span>Certificate image (optional)</span>
+            <div className="admin-project-upload-row">
+              <div className="admin-project-upload-preview">
+                {imageFile
+                  ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={imagePreview}
+                        alt={`${form.title || "Certificate"} preview`}
+                      />
+                    )
+                  : safeImageSource(form.image)
+                    ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={safeImageSource(form.image)}
+                          alt={`${form.title || "Certificate"} preview`}
+                        />
+                      )
+                    : <span>Certificate preview</span>}
+              </div>
+              <div className="admin-project-upload-controls">
+                <label className="admin-project-upload-control">
+                  <input
+                    type="file"
+                    accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                    onChange={handleImageSelection}
+                    disabled={pending}
+                    aria-label="Choose a certificate image"
+                  />
+                  <span>Choose File</span>
+                </label>
+                {imageFile && (
+                  <button
+                    type="button"
+                    className="admin-project-clear-upload"
+                    onClick={() => {
+                      onImageFileChange(null);
+                      setImagePreview("");
+                      setImageFileError("");
+                    }}
+                    disabled={pending}
+                  >
+                    Remove selected image
+                  </button>
+                )}
+                <small>
+                  {imageFile
+                    ? imageFile.name
+                    : "JPG, JPEG, PNG, or WEBP. Maximum 5 MB."}
+                </small>
+                {uploadingImage && (
+                  <small role="status" aria-live="polite">
+                    Uploading image…
+                  </small>
+                )}
+                {imageFileError && (
+                  <small className="admin-project-upload-error" role="alert">
+                    {imageFileError}
+                  </small>
+                )}
+              </div>
+            </div>
+          </div>
+
           <label className="admin-project-field">
             <span>Description</span>
             <textarea
@@ -238,7 +346,9 @@ function CertificationForm({
               disabled={pending}
             >
               {pending
-                ? "Saving…"
+                ? uploadingImage
+                  ? "Uploading image…"
+                  : "Saving…"
                 : editing
                   ? "Save changes"
                   : "Add certification"}
@@ -368,7 +478,9 @@ export default function CertificationsClient({
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingCertification, setEditingCertification] = useState(null);
   const [form, setForm] = useState(emptyForm);
+  const [imageFile, setImageFile] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [deletingId, setDeletingId] = useState("");
   const [isRefreshing, startRefresh] = useTransition();
 
@@ -376,6 +488,7 @@ export default function CertificationsClient({
     setNotice(null);
     setEditingCertification(null);
     setForm(emptyForm);
+    setImageFile(null);
     setIsFormOpen(true);
   }
 
@@ -383,6 +496,7 @@ export default function CertificationsClient({
     setNotice(null);
     setEditingCertification(certification);
     setForm(certificationToForm(certification));
+    setImageFile(null);
     setIsFormOpen(true);
   }
 
@@ -390,6 +504,7 @@ export default function CertificationsClient({
     if (saving) return;
     setIsFormOpen(false);
     setEditingCertification(null);
+    setImageFile(null);
   }
 
   function updateField(field, value) {
@@ -403,6 +518,14 @@ export default function CertificationsClient({
 
     try {
       const payload = formatCertificationPayload(form);
+      if (imageFile) {
+        setUploadingImage(true);
+        payload.image = await uploadAdminImage(
+          "/api/admin/certifications/upload-image",
+          imageFile
+        );
+      }
+
       const response = editingCertification
         ? await updateCertification(editingCertification._id, payload)
         : await createCertification(payload);
@@ -424,6 +547,7 @@ export default function CertificationsClient({
       setLoadError("");
       setIsFormOpen(false);
       setEditingCertification(null);
+      setImageFile(null);
       setNotice({
         type: "success",
         message: response.message || "Certification saved successfully.",
@@ -437,6 +561,7 @@ export default function CertificationsClient({
             : error.message || "Unable to save the certification.",
       });
     } finally {
+      setUploadingImage(false);
       setSaving(false);
     }
   }
@@ -565,9 +690,12 @@ export default function CertificationsClient({
       {isFormOpen && (
         <CertificationForm
           form={form}
+          imageFile={imageFile}
           editing={Boolean(editingCertification)}
           pending={saving}
+          uploadingImage={uploadingImage}
           onChange={updateField}
+          onImageFileChange={setImageFile}
           onClose={closeForm}
           onSubmit={handleSubmit}
         />

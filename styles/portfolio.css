@@ -371,8 +371,16 @@
   margin-top: 14px;
 }
 
+.portfolio-about-intro-column,
 .portfolio-about-copy {
   min-width: 0;
+}
+
+.portfolio-about-summary {
+  margin: 18px 0 0;
+  color: #475569;
+  font-size: 13px;
+  line-height: 1.8;
 }
 
 .portfolio-about-intro {
@@ -436,6 +444,45 @@
   text-underline-offset: 3px;
 }
 
+.portfolio-about-social {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--portfolio-line);
+}
+
+.portfolio-about-social h3 {
+  margin: 0 0 10px;
+  color: var(--portfolio-navy);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.portfolio-about-social-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+}
+
+.portfolio-about-social-links a {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--portfolio-navy);
+  font-size: 12px;
+  font-weight: 600;
+  transition: color 160ms ease;
+}
+
+.portfolio-about-social-links a:hover {
+  color: #0284c7;
+}
+
+.portfolio-about-social-links .portfolio-social-icon {
+  width: 16px;
+  height: 16px;
+}
+
 .portfolio-inline-link {
   display: inline-flex;
   align-items: center;
@@ -492,21 +539,39 @@
 }
 
 .portfolio-skill-card li {
-  display: flex;
-  min-height: 36px;
-  align-items: center;
-  justify-content: space-between;
+  display: grid;
   gap: 8px;
-  padding: 0 10px;
+  padding: 9px 10px 10px;
   border-radius: 4px;
   background: var(--portfolio-gray);
   color: #334155;
   font-size: 11px;
 }
 
+.portfolio-skill-item-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
 .portfolio-skill-level {
   color: var(--portfolio-muted);
   font-size: 10px;
+}
+
+.portfolio-skill-progress-track {
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e2e8f0;
+}
+
+.portfolio-skill-progress-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #101c3a;
 }
 
 .portfolio-project-grid,

@@ -4,8 +4,15 @@ const sendApiError = require("../utils/apiError");
 const mongoose = require("mongoose");
 const Testimonial = require("../models/Testimonial");
 const authMiddleware = require("../middleware/authMiddleware");
+const createImageUploadMiddleware = require("../utils/cloudinaryImageUpload");
 
 const router = express.Router();
+
+router.post(
+    "/upload-image",
+    authMiddleware,
+    ...createImageUploadMiddleware("nisha-portfolio/testimonials")
+);
 
 // GET: All visible testimonials
 router.get("/", async (req, res) => {

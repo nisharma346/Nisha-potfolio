@@ -1,12 +1,20 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { uploadAdminImage } from "../../../lib/admin-image-upload";
 import {
   createTestimonial,
   removeTestimonial,
   updateTestimonial,
 } from "./actions";
+
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
+const ALLOWED_IMAGE_TYPES = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+]);
 
 const emptyForm = {
   name: "",
@@ -52,14 +60,66 @@ function formatTestimonialPayload(form) {
   };
 }
 
+function safeImageSource(value) {
+  const source = value.trim();
+  if (source.startsWith("/") && !source.startsWith("//")) return source;
+
+  try {
+    const url = new URL(source);
+    return url.protocol === "http:" || url.protocol === "https:"
+      ? source
+      : "";
+  } catch {
+    return "";
+  }
+}
+
 function TestimonialForm({
   form,
+  imageFile,
   editing,
   pending,
+  uploadingImage,
   onChange,
+  onImageFileChange,
   onClose,
   onSubmit,
 }) {
+  const [imagePreview, setImagePreview] = useState("");
+  const [imageFileError, setImageFileError] = useState("");
+
+  useEffect(() => {
+    if (!imageFile || !imagePreview) return undefined;
+    return () => URL.revokeObjectURL(imagePreview);
+  }, [imageFile, imagePreview]);
+
+  function handleImageSelection(event) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+
+    if (!file) return;
+    if (!ALLOWED_IMAGE_TYPES.has(file.type)) {
+      onImageFileChange(null);
+      setImagePreview("");
+      setImageFileError("Choose a JPG, JPEG, PNG, or WEBP image.");
+      return;
+    }
+    if (file.size > MAX_IMAGE_SIZE) {
+      onImageFileChange(null);
+      setImagePreview("");
+      setImageFileError("Image files must be 5 MB or smaller.");
+      return;
+    }
+
+    setImageFileError("");
+    setImagePreview(URL.createObjectURL(file));
+    onImageFileChange(file);
+  }
+
+  const previewSource = imageFile
+    ? imagePreview
+    : safeImageSource(form.image);
+
   return (
     <div
       className="admin-project-modal-backdrop"
@@ -129,13 +189,71 @@ function TestimonialForm({
               />
             </label>
             <label className="admin-project-field">
-              <span>Image URL</span>
+              <span>Image URL (optional)</span>
               <input
                 value={form.image}
                 onChange={(event) => onChange("image", event.target.value)}
                 placeholder="https://example.com/image.jpg"
               />
             </label>
+          </div>
+
+          <div className="admin-project-field">
+            <span>Profile photo (optional)</span>
+            <div className="admin-project-upload-row">
+              <div className="admin-project-upload-preview">
+                {previewSource ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={previewSource}
+                    alt={`${form.name || "Testimonial"} photo preview`}
+                  />
+                ) : (
+                  <span>Profile photo preview</span>
+                )}
+              </div>
+              <div className="admin-project-upload-controls">
+                <label className="admin-project-upload-control">
+                  <input
+                    type="file"
+                    accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                    onChange={handleImageSelection}
+                    disabled={pending}
+                    aria-label="Choose a testimonial profile photo"
+                  />
+                  <span>Choose File</span>
+                </label>
+                {imageFile && (
+                  <button
+                    type="button"
+                    className="admin-project-clear-upload"
+                    onClick={() => {
+                      onImageFileChange(null);
+                      setImagePreview("");
+                      setImageFileError("");
+                    }}
+                    disabled={pending}
+                  >
+                    Remove selected image
+                  </button>
+                )}
+                <small>
+                  {imageFile
+                    ? imageFile.name
+                    : "JPG, JPEG, PNG, or WEBP. Maximum 5 MB."}
+                </small>
+                {uploadingImage && (
+                  <small role="status" aria-live="polite">
+                    Uploading image…
+                  </small>
+                )}
+                {imageFileError && (
+                  <small className="admin-project-upload-error" role="alert">
+                    {imageFileError}
+                  </small>
+                )}
+              </div>
+            </div>
           </div>
 
           <label className="admin-project-field">
@@ -200,7 +318,9 @@ function TestimonialForm({
               disabled={pending}
             >
               {pending
-                ? "Saving…"
+                ? uploadingImage
+                  ? "Uploading image…"
+                  : "Saving…"
                 : editing
                   ? "Save changes"
                   : "Add testimonial"}
@@ -289,7 +409,9 @@ export default function TestimonialsClient({
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingTestimonial, setEditingTestimonial] = useState(null);
   const [form, setForm] = useState(emptyForm);
+  const [imageFile, setImageFile] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [deletingId, setDeletingId] = useState("");
   const [isRefreshing, startRefresh] = useTransition();
 
@@ -297,6 +419,7 @@ export default function TestimonialsClient({
     setNotice(null);
     setEditingTestimonial(null);
     setForm(emptyForm);
+    setImageFile(null);
     setIsFormOpen(true);
   }
 
@@ -304,6 +427,7 @@ export default function TestimonialsClient({
     setNotice(null);
     setEditingTestimonial(testimonial);
     setForm(testimonialToForm(testimonial));
+    setImageFile(null);
     setIsFormOpen(true);
   }
 
@@ -311,6 +435,7 @@ export default function TestimonialsClient({
     if (saving) return;
     setIsFormOpen(false);
     setEditingTestimonial(null);
+    setImageFile(null);
   }
 
   function updateField(field, value) {
@@ -324,6 +449,14 @@ export default function TestimonialsClient({
 
     try {
       const payload = formatTestimonialPayload(form);
+      if (imageFile) {
+        setUploadingImage(true);
+        payload.image = await uploadAdminImage(
+          "/api/admin/testimonials/upload-image",
+          imageFile
+        );
+      }
+
       const response = editingTestimonial
         ? await updateTestimonial(editingTestimonial._id, payload)
         : await createTestimonial(payload);
@@ -345,6 +478,7 @@ export default function TestimonialsClient({
       setLoadError("");
       setIsFormOpen(false);
       setEditingTestimonial(null);
+      setImageFile(null);
       setNotice({
         type: "success",
         message: response.message || "Testimonial saved successfully.",
@@ -358,6 +492,7 @@ export default function TestimonialsClient({
             : error.message || "Unable to save the testimonial.",
       });
     } finally {
+      setUploadingImage(false);
       setSaving(false);
     }
   }
@@ -488,9 +623,12 @@ export default function TestimonialsClient({
       {isFormOpen && (
         <TestimonialForm
           form={form}
+          imageFile={imageFile}
           editing={Boolean(editingTestimonial)}
           pending={saving}
+          uploadingImage={uploadingImage}
           onChange={updateField}
+          onImageFileChange={setImageFile}
           onClose={closeForm}
           onSubmit={handleSubmit}
         />
