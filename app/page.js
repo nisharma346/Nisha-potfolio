@@ -182,6 +182,17 @@ export default async function Home() {
     { label: "Contact", href: "#contact" },
   ];
 
+  const footerLinks = [
+    { label: "Home", href: "#home" },
+    { label: "About", href: "#about" },
+    { label: "Skills", href: "#skills" },
+    { label: "Projects", href: "#projects" },
+    { label: "Journey", href: "#journey" },
+    { label: "Resume", href: "#resume" },
+    { label: "Achievements", href: "#accomplishments" },
+    { label: "Contact", href: "#contact" },
+  ];
+
   let sectionIndex = 0;
   const nextSectionNumber = () => String(++sectionIndex).padStart(2, "0");
 
@@ -698,35 +709,39 @@ export default async function Home() {
             <nav aria-label="Footer navigation">
               <h2>Quick links</h2>
               <ul>
-                {navigationLinks.map((link) => (
+                {footerLinks.map((link) => (
                   <li key={link.href}>
                     <a href={link.href}>{link.label}</a>
                   </li>
                 ))}
               </ul>
             </nav>
-            <div>
+            <div className="portfolio-footer-connect">
               <h2>Connect</h2>
-              <ul>
+              <ul className="portfolio-footer-social-links">
                 {about?.email && (
                   <li>
                     <a href={`mailto:${about.email}`}>{about.email}</a>
                   </li>
                 )}
-                {about?.github && (
-                  <li>
-                    <a href={about.github} target="_blank" rel="noreferrer">
-                      GitHub <span aria-hidden="true">↗</span>
-                    </a>
-                  </li>
-                )}
-                {about?.linkedin && (
-                  <li>
-                    <a href={about.linkedin} target="_blank" rel="noreferrer">
-                      LinkedIn <span aria-hidden="true">↗</span>
-                    </a>
-                  </li>
-                )}
+                <li>
+                  <a
+                    href="https://github.com/nisharma346"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    GitHub <span aria-hidden="true">↗</span>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="https://www.linkedin.com/in/nisha-kumari-6a9948377/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    LinkedIn <span aria-hidden="true">↗</span>
+                  </a>
+                </li>
               </ul>
             </div>
           </div>

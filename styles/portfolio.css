@@ -877,8 +877,9 @@
 
 .portfolio-footer {
   padding: 52px 0 18px;
-  border-top: 1px solid var(--portfolio-line);
-  background: var(--portfolio-gray);
+  border-top: 1px solid rgba(203, 213, 225, 0.18);
+  background: #101c3a;
+  color: #ffffff;
 }
 
 .portfolio-footer-main {
@@ -889,20 +890,21 @@
 
 .portfolio-footer-logo {
   display: inline-block;
+  color: #ffffff;
   font-size: 20px;
 }
 
 .portfolio-footer-brand > p {
   max-width: 360px;
   margin: 9px 0 0;
-  color: var(--portfolio-muted);
+  color: #cbd5e1;
   font-size: 12px;
   line-height: 1.75;
 }
 
 .portfolio-footer-main h2 {
   margin: 2px 0 13px;
-  color: var(--portfolio-navy);
+  color: #ffffff;
   font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.7px;
@@ -917,16 +919,20 @@
 .portfolio-footer-main li,
 .portfolio-footer-main li a {
   overflow-wrap: anywhere;
-  color: #475569;
+  color: #cbd5e1;
   font-size: 11px;
   line-height: 1.6;
 }
 
 .portfolio-footer-main li a:hover {
-  color: var(--portfolio-navy);
+  color: #38bdf8;
   text-decoration: underline;
-  text-decoration-color: var(--portfolio-blue);
+  text-decoration-color: #38bdf8;
   text-underline-offset: 3px;
+}
+
+.portfolio-footer-social-links {
+  gap: 12px;
 }
 
 .portfolio-footer-bottom {
@@ -936,20 +942,24 @@
   gap: 15px;
   margin-top: 34px;
   padding-top: 16px;
-  border-top: 1px solid var(--portfolio-line);
+  border-top: 1px solid rgba(203, 213, 225, 0.18);
 }
 
 .portfolio-footer-bottom p,
 .portfolio-footer-bottom a {
   margin: 0;
-  color: var(--portfolio-muted);
+  color: #cbd5e1;
   font-size: 10px;
   line-height: 1.6;
 }
 
 .portfolio-footer-bottom a {
-  color: var(--portfolio-navy);
+  color: #ffffff;
   font-weight: 700;
+}
+
+.portfolio-footer-bottom a:hover {
+  color: #38bdf8;
 }
 
 @media (max-width: 1000px) {
@@ -1209,6 +1219,17 @@
     flex-direction: column;
     gap: 7px;
     margin-top: 26px;
+  }
+}
+
+@media (max-width: 600px) {
+  .portfolio-footer-main {
+    grid-template-columns: 1fr;
+    gap: 25px;
+  }
+
+  .portfolio-footer-brand {
+    grid-column: auto;
   }
 }
 
