@@ -5,6 +5,63 @@ import { getData } from "../lib/api";
 
 export const dynamic = "force-dynamic";
 
+const socialProfiles = [
+  {
+    label: "GitHub",
+    href: "https://github.com/nisharma346",
+    icon: "github",
+  },
+  {
+    label: "LinkedIn",
+    href: "https://www.linkedin.com/in/nisha-kumari-6a9948377/",
+    icon: "linkedin",
+  },
+];
+
+function ProfileIcon({ type }) {
+  if (type === "github") {
+    return (
+      <svg
+        aria-hidden="true"
+        className="portfolio-social-icon"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+      >
+        <path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.85 10.91.57.1.78-.25.78-.55v-2.1c-3.19.69-3.86-1.36-3.86-1.36-.52-1.33-1.28-1.69-1.28-1.69-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.02 1.75 2.67 1.24 3.32.95.1-.74.4-1.24.72-1.53-2.55-.29-5.24-1.28-5.24-5.7 0-1.26.45-2.29 1.18-3.1-.12-.29-.51-1.47.11-3.06 0 0 .96-.31 3.15 1.18a10.94 10.94 0 0 1 5.73 0c2.19-1.49 3.15-1.18 3.15-1.18.62 1.59.23 2.77.11 3.06.74.81 1.18 1.84 1.18 3.1 0 4.43-2.7 5.41-5.27 5.7.41.36.77 1.06.77 2.14v3.18c0 .3.21.66.79.55A11.51 11.51 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z" />
+      </svg>
+    );
+  }
+
+  if (type === "linkedin") {
+    return (
+      <svg
+        aria-hidden="true"
+        className="portfolio-social-icon"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+      >
+        <path d="M22.22 1H1.78C.79 1 0 1.77 0 2.72v18.56c0 .95.79 1.72 1.78 1.72h20.44c.99 0 1.78-.77 1.78-1.72V2.72C24 1.77 23.21 1 22.22 1ZM7.12 20.45H3.56V8.99h3.56v11.46ZM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12Zm15.11 13.02h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.13 1.45-2.13 2.94v5.67H9.35V8.99h3.42v1.56h.05c.48-.9 1.64-1.85 3.38-1.85 3.61 0 4.28 2.38 4.28 5.47v6.28Z" />
+      </svg>
+    );
+  }
+
+  return (
+    <svg
+      aria-hidden="true"
+      className="portfolio-social-icon"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.7"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="3" y="5" width="18" height="14" rx="2" />
+      <path d="m4 7 8 6 8-6" />
+    </svg>
+  );
+}
+
 function reportDataFetchFailure(resource, error) {
   if (error instanceof Error && error.message === "BACKEND_UNAVAILABLE") {
     console.warn(`${resource} data is unavailable.`);
@@ -226,20 +283,19 @@ export default async function Home() {
                 Contact me <span aria-hidden="true">↗</span>
               </a>
             </div>
-            {(about?.github || about?.linkedin) && (
-              <div className="portfolio-social-links">
-                {about.github && (
-                  <a href={about.github} target="_blank" rel="noreferrer">
-                    GitHub <span aria-hidden="true">↗</span>
-                  </a>
-                )}
-                {about.linkedin && (
-                  <a href={about.linkedin} target="_blank" rel="noreferrer">
-                    LinkedIn <span aria-hidden="true">↗</span>
-                  </a>
-                )}
-              </div>
-            )}
+            <div className="portfolio-social-links">
+              {socialProfiles.map((profile) => (
+                <a
+                  href={profile.href}
+                  key={profile.label}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <ProfileIcon type={profile.icon} />
+                  {profile.label}
+                </a>
+              ))}
+            </div>
           </div>
 
           <div className="portfolio-hero-visual">
@@ -693,6 +749,41 @@ export default async function Home() {
             id="contact-title"
           />
           <ContactForm email={about?.email || ""} />
+          <div className="portfolio-contact-social">
+            <h3>Social profiles</h3>
+            <ul>
+              {socialProfiles.map((profile) => (
+                <li key={profile.label}>
+                  <a
+                    href={profile.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <ProfileIcon type={profile.icon} />
+                    <span className="portfolio-contact-profile-copy">
+                      <strong>{profile.label}</strong>
+                      <span className="portfolio-contact-profile-value">
+                        {profile.href.replace(/^https:\/\/(www\.)?/, "")}
+                      </span>
+                    </span>
+                  </a>
+                </li>
+              ))}
+              {about?.email && (
+                <li>
+                  <a href={`mailto:${about.email}`}>
+                    <ProfileIcon type="email" />
+                    <span className="portfolio-contact-profile-copy">
+                      <strong>Email</strong>
+                      <span className="portfolio-contact-profile-value">
+                        {about.email}
+                      </span>
+                    </span>
+                  </a>
+                </li>
+              )}
+            </ul>
+          </div>
         </div>
       </section>
 
@@ -724,24 +815,17 @@ export default async function Home() {
                     <a href={`mailto:${about.email}`}>{about.email}</a>
                   </li>
                 )}
-                <li>
-                  <a
-                    href="https://github.com/nisharma346"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    GitHub <span aria-hidden="true">↗</span>
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="https://www.linkedin.com/in/nisha-kumari-6a9948377/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    LinkedIn <span aria-hidden="true">↗</span>
-                  </a>
-                </li>
+                {socialProfiles.map((profile) => (
+                  <li key={profile.label}>
+                    <a
+                      href={profile.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {profile.label} <span aria-hidden="true">↗</span>
+                    </a>
+                  </li>
+                ))}
               </ul>
             </div>
           </div>

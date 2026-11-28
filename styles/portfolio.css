@@ -246,13 +246,22 @@
 }
 
 .portfolio-social-links a {
-  color: var(--portfolio-muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--portfolio-navy);
   font-size: 12px;
   transition: color 160ms ease;
 }
 
 .portfolio-social-links a:hover {
-  color: var(--portfolio-navy);
+  color: #0284c7;
+}
+
+.portfolio-social-icon {
+  width: 17px;
+  height: 17px;
+  flex: 0 0 auto;
 }
 
 .portfolio-hero-visual {
@@ -875,6 +884,75 @@
   color: var(--portfolio-navy);
 }
 
+.portfolio-contact-social {
+  width: min(100%, 700px);
+  margin: 32px auto 0;
+}
+
+.portfolio-contact-social h3 {
+  margin: 0 0 12px;
+  color: var(--portfolio-navy);
+  font-size: 14px;
+}
+
+.portfolio-contact-social ul {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.portfolio-contact-social li {
+  min-width: 0;
+}
+
+.portfolio-contact-social li a {
+  display: flex;
+  min-height: 68px;
+  align-items: center;
+  gap: 11px;
+  padding: 12px;
+  border: 1px solid var(--portfolio-line);
+  border-radius: 5px;
+  background: var(--portfolio-white);
+  color: var(--portfolio-navy);
+  text-decoration: none;
+  transition: border-color 160ms ease, color 160ms ease;
+}
+
+.portfolio-contact-social li a:hover {
+  border-color: var(--portfolio-blue);
+  color: #0284c7;
+}
+
+.portfolio-contact-social .portfolio-social-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.portfolio-contact-profile-copy {
+  min-width: 0;
+}
+
+.portfolio-contact-profile-copy strong,
+.portfolio-contact-profile-value {
+  display: block;
+}
+
+.portfolio-contact-profile-copy strong {
+  font-size: 12px;
+}
+
+.portfolio-contact-profile-value {
+  margin-top: 4px;
+  color: var(--portfolio-muted);
+  font-size: 10px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
 .portfolio-footer {
   padding: 52px 0 18px;
   border-top: 1px solid rgba(203, 213, 225, 0.18);
@@ -1226,6 +1304,10 @@
   .portfolio-footer-main {
     grid-template-columns: 1fr;
     gap: 25px;
+  }
+
+  .portfolio-contact-social ul {
+    grid-template-columns: 1fr;
   }
 
   .portfolio-footer-brand {
